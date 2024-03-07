@@ -17,6 +17,7 @@ class Docx extends \ZipArchive
     const DOCUMENT_BODY_LOCATION = 'word/document.xml';
     const HEADER_LOCATION = 'word/header1.xml';
     const FOOTER_LOCATION = 'word/footer1.xml';
+    const FOOTER_NOTES_LOCATION = 'word/footnotes.xml';
 
     /**
      * @var string
@@ -50,6 +51,7 @@ class Docx extends \ZipArchive
     {
         $this->replaceTextInLocation($from, $to, self::HEADER_LOCATION);
         $this->replaceTextInLocation($from, $to, self::FOOTER_LOCATION);
+        $this->replaceTextInLocation($from, $to, self::FOOTER_NOTES_LOCATION);
         $this->replaceTextInLocation($from, $to, self::DOCUMENT_BODY_LOCATION);
     }
 
@@ -63,6 +65,7 @@ class Docx extends \ZipArchive
     {
         $this->replaceTextInLocation($from, $to, self::HEADER_LOCATION, true);
         $this->replaceTextInLocation($from, $to, self::FOOTER_LOCATION, true);
+        $this->replaceTextInLocation($from, $to, self::FOOTER_NOTES_LOCATION, true);
         $this->replaceTextInLocation($from, $to, self::DOCUMENT_BODY_LOCATION, true);
     }
 
@@ -76,7 +79,7 @@ class Docx extends \ZipArchive
      */
     public function replaceTextToImage($text, $path)
     {
-        if (! file_exists($path)) {
+        if (!file_exists($path)) {
             throw new \Exception('Image not exists');
         }
         list($width, $height, $type) = getimagesize($path);
@@ -106,10 +109,12 @@ class Docx extends \ZipArchive
         $to = $this->fixLineBreaksInTo($to);
 
         $message = $this->getFromName($location);
-        if ($caseInsensitive) {
-            $message = str_ireplace($from, $to, $message);
-        } else {
-            $message = str_replace($from, $to, $message);
+        if ($message !== false) {
+            if ($caseInsensitive) {
+                $message = str_ireplace($from, $to, $message);
+            } else {
+                $message = str_replace($from, $to, $message);
+            }
         }
 
         $this->addFromString($location, $message);
@@ -225,6 +230,6 @@ class Docx extends \ZipArchive
     {
         preg_match('!\d+!', $relId, $matches);
 
-        return (int) $matches[0];
+        return (int)$matches[0];
     }
 }
